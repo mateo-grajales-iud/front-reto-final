@@ -1,5 +1,14 @@
 <template lang="">
   <NavBarComponent />
+  <div>
+    <div class="alert alert-danger" role="alert" v-if="onError">
+      {{ onError }}
+    </div>
+    <div class="alert alert-success" role="alert" v-if="onExito">
+      {{ onExito }}
+    </div>
+  </div>
+
   <div v-if="usuario.user.role == 1" class="row justify-content-center m-5">
     <div class="col-5">
       <form @submit.prevent="crearAsignatura">
@@ -111,6 +120,50 @@
       </form>
     </div>
   </div>
+
+  <div>
+    <div class="row justify-content-center m-5">
+      <div
+        class="card"
+        style="width: 18rem"
+        v-for="asignatura in asignaturas"
+        :key="asignatura.id"
+        :value="asignatura"
+      >
+        <div class="card-body">
+          <h5 class="card-title">{{ asignatura.nombre }}</h5>
+          <p><strong>Docente: </strong>{{ asignatura.docente }}</p>
+          <p><strong>Creditos: </strong>{{ asignatura.creditos }}</p>
+          <p><strong>Docente: </strong>{{ asignatura.docente }}</p>
+          <p>
+            <strong>Prerequisito: </strong
+            >{{
+              asignatura.prerequisito != null
+                ? asignaturas.find((obj) => obj.id == asignatura.prerequisito)
+                    .nombre
+                : null
+            }}
+          </p>
+          <p>
+            <strong>Horas trabajo autonomo: </strong
+            >{{ asignatura.trabajo_autonomo }}
+          </p>
+          <p>
+            <strong>Horas trabajo dirigido: </strong
+            >{{ asignatura.trabajo_dirigido }}
+          </p>
+          <button
+            v-if="usuario.user.role == 1"
+            class="btn btn-primary mb-3 mt-3"
+            @click="borrarAsignatura(asignatura)"
+          >
+            Borrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div>
     <div class="row justify-content-center m-5">
       <table class="table table-striped">
@@ -146,7 +199,12 @@
             </td>
             <td>{{ asignatura.trabajo_autonomo }}</td>
             <td>{{ asignatura.trabajo_dirigido }}</td>
-            <td v-if="usuario.user.role == 1" @click="borrarAsignatura(asignatura)"><button>Borrar</button></td>
+            <td
+              v-if="usuario.user.role == 1"
+              @click="borrarAsignatura(asignatura)"
+            >
+              <button>Borrar</button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -197,6 +255,8 @@ export default {
       trabajo_autonomoEditar: "",
       trabajo_dirigidoEditar: "",
       asignaturaEditar: "",
+      error: "",
+      exito: "",
     };
   },
   mounted() {
@@ -205,9 +265,17 @@ export default {
   components: {
     NavBarComponent,
   },
+  computed: {
+    onError() {
+      return this.error;
+    },
+    onExito() {
+      return this.exito;
+    },
+  },
   methods: {
-    async borrarAsignatura(id){
-      console.log("borrando ", id)
+    async borrarAsignatura(id) {
+      console.log("borrando ", id);
       var url = "http://laravel-sanctum-api.test/api/asignaturas/" + id.id;
       var conf = {
         headers: {
@@ -231,14 +299,17 @@ export default {
         });
       console.log("fin borrar asignatura");
     },
-    async editarAsignatura(){
+    async editarAsignatura() {
       console.log("editando");
-      var url = "http://laravel-sanctum-api.test/api/asignaturas/" + this.asignaturaEditar.id;
+      var url =
+        "http://laravel-sanctum-api.test/api/asignaturas/" +
+        this.asignaturaEditar.id;
       var asignatura = {
         nombre: this.nombreEditar,
         creditos: this.creditosEditar,
         docente: this.docenteEditar,
-        prerequisito: this.prerequisitoEditar == ""? null : this.prerequisitoEditar.id,
+        prerequisito:
+          this.prerequisitoEditar == "" ? null : this.prerequisitoEditar.id,
         trabajo_autonomo: this.trabajo_autonomoEditar,
         trabajo_dirigido: this.trabajo_dirigidoEditar,
       };
@@ -266,7 +337,7 @@ export default {
 
     cambioEditar() {
       var asig = this.asignaturaEditar;
-      var pre = this.asignaturas.find(obj => obj.id == asig.prerequisito);
+      var pre = this.asignaturas.find((obj) => obj.id == asig.prerequisito);
       this.nombreEditar = asig.nombre;
       this.docenteEditar = asig.docente;
       this.creditosEditar = asig.creditos;
@@ -280,12 +351,10 @@ export default {
       await axios
         .get(url, {}, {})
         .then((res) => {
-          console.log(res.data);
           this.asignaturas = res.data;
           this.error = "";
         })
         .catch((err) => {
-          console.log(err);
           this.exito = "";
           this.error = err.message;
         });

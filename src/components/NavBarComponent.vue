@@ -1,5 +1,4 @@
 <template lang="">
-    {{ usuario }}
   <nav class="navbar navbar-expand-lg bg-primary">
     <div class="container-fluid">
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">

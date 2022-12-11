@@ -36,8 +36,6 @@ export default {
     NavBarComponent
   },
   setup(){
-    console.log("validando usuario...");    
-    console.log(localStorage.usuario);
     var usuario;
     if (localStorage.usuario == undefined || localStorage.usuario == null) {
       usuario = {
